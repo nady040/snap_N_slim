@@ -17,6 +17,7 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, profile }) => {
 
   const chartData = last7Days.map(date => ({
     date,
+    dayName: new Date(date).toLocaleDateString('en-US', { weekday: 'short' }),
     shortDate: date.split('-').slice(1).join('/'),
     calories: history[date]?.totalConsumed || 0,
     isOver: (history[date]?.totalConsumed || 0) > profile.dailyGoal
@@ -26,55 +27,57 @@ const HistoryView: React.FC<HistoryViewProps> = ({ history, profile }) => {
   const chartHeight = 160;
 
   return (
-    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm mb-8 overflow-hidden">
-      <div className="flex justify-between items-center mb-6">
-        <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
-          <svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-          </svg>
-          Weekly History
-        </h3>
-        <div className="flex items-center gap-3 text-xs font-medium">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-            <span className="text-slate-500">Under Goal</span>
+    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-100 mb-8 overflow-hidden animate-in fade-in zoom-in-95 duration-500">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h3 className="text-lg font-bold text-slate-800">Weekly Trends</h3>
+          <p className="text-xs text-slate-400 font-medium">Last 7 days calorie intake</p>
+        </div>
+        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wide bg-slate-50 p-2 rounded-xl">
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-200"></div>
+            <span className="text-slate-500">Good</span>
           </div>
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-rose-500"></div>
-            <span className="text-slate-500">Over Goal</span>
+          <div className="flex items-center gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-200"></div>
+            <span className="text-slate-500">Over</span>
           </div>
         </div>
       </div>
 
-      <div className="relative h-[200px] mt-4 flex items-end justify-between gap-2 px-2">
+      <div className="relative h-[200px] flex items-end justify-between gap-3 px-2">
         {/* Goal line */}
         <div 
-          className="absolute left-0 right-0 border-t-2 border-dashed border-slate-200 z-0 flex items-center"
+          className="absolute left-0 right-0 border-t-2 border-dashed border-slate-200 z-0 flex items-center pointer-events-none"
           style={{ bottom: `${(profile.dailyGoal / maxCal) * chartHeight}px` }}
         >
-          <span className="bg-white text-[10px] font-bold text-slate-400 px-1 ml-auto">GOAL: {profile.dailyGoal}</span>
+          <span className="bg-slate-100 text-[10px] font-bold text-slate-400 px-2 py-0.5 rounded-full ml-auto transform -translate-y-1/2 border border-slate-200">Goal: {profile.dailyGoal}</span>
         </div>
 
         {chartData.map((day, i) => {
-          const barHeight = (day.calories / maxCal) * chartHeight;
+          const barHeight = Math.max((day.calories / maxCal) * chartHeight, 4); // Min height visually
           return (
-            <div key={i} className="flex-1 flex flex-col items-center group">
+            <div key={i} className="flex-1 flex flex-col items-center group relative z-10">
               <div className="relative w-full flex justify-center items-end h-[160px]">
                 {/* Tooltip on hover */}
-                <div className="absolute bottom-full mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                  <div className="bg-slate-800 text-white text-[10px] py-1 px-2 rounded shadow-lg whitespace-nowrap">
+                <div className="absolute bottom-full mb-3 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none z-20">
+                  <div className="bg-slate-800 text-white text-[10px] font-bold py-1.5 px-3 rounded-lg shadow-lg whitespace-nowrap relative">
                     {day.calories} kcal
+                    <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-slate-800 rotate-45"></div>
                   </div>
                 </div>
                 
                 <div 
-                  className={`w-full max-w-[32px] rounded-t-lg transition-all duration-500 ease-out ${
-                    day.isOver ? 'bg-rose-500' : 'bg-blue-500'
+                  className={`w-full max-w-[28px] rounded-t-xl transition-all duration-700 ease-out hover:opacity-80 cursor-pointer ${
+                    day.isOver ? 'bg-gradient-to-t from-rose-500 to-rose-400 shadow-lg shadow-rose-200' : 'bg-gradient-to-t from-blue-600 to-indigo-500 shadow-lg shadow-blue-200'
                   }`}
                   style={{ height: `${barHeight}px` }}
                 />
               </div>
-              <span className="text-[10px] mt-2 font-medium text-slate-500">{day.shortDate}</span>
+              <div className="text-center mt-3">
+                <span className="text-[10px] font-bold text-slate-400 block uppercase">{day.dayName}</span>
+                <span className="text-[9px] font-medium text-slate-300 block">{day.shortDate}</span>
+              </div>
             </div>
           );
         })}
