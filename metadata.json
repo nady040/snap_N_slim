@@ -1,0 +1,7 @@
+{
+  "name": "SnapSlim Calorie Tracker",
+  "description": "An intelligent weight loss companion that calculates daily calorie needs and analyzes food intake through photos using AI vision.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
